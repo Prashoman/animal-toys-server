@@ -25,6 +25,20 @@ async function run() {
 
     const toyCollection = client.db("animalsToysDB").collection("toys");
 
+    const indexKey = { toyName: 1 };
+    const indexOptions = { name: "toyName" };
+    const result = await toyCollection.createIndex(indexKey, indexOptions);
+
+    app.get("/getToys/:name", async (req, res) => {
+      const text = req.params.name;
+      const result = await toyCollection
+        .find({
+          toyName: { $regex: text, $options: "i" },
+        })
+        .toArray();
+      res.send(result);
+    });
+
     app.get("/allToys", async (req, res) => {
       const result = await toyCollection.find().limit(20).toArray();
       res.send(result);
