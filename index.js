@@ -6,7 +6,7 @@ app.use(cors());
 app.use(express.json());
 require("dotenv").config();
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.5onzxss.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -26,7 +26,12 @@ async function run() {
     const toyCollection = client.db("animalsToysDB").collection("toys");
 
     app.get("/allToys", async (req, res) => {
-      const result = await toyCollection.find().toArray();
+      const result = await toyCollection.find().limit(20).toArray();
+      res.send(result);
+    });
+    app.get("/details/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await toyCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
 
