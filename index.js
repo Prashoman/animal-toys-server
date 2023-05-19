@@ -138,6 +138,9 @@ async function run() {
     app.post("/insert/toys", async (req, res) => {
       const toys = req.body;
       //console.log(toys);
+      const price = parseInt(toys.price);
+      toys.price = price;
+      //console.log(toys);
       const result = await toyCollection.insertOne(toys);
       res.send(result);
     });
