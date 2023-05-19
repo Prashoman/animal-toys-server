@@ -29,16 +29,30 @@ async function run() {
     const indexOptions = { name: "toyName" };
     const result = await toyCollection.createIndex(indexKey, indexOptions);
 
+    ///search by toys name
     app.get("/getToys/:name", async (req, res) => {
       const text = req.params.name;
+
       const result = await toyCollection
         .find({
           toyName: { $regex: text, $options: "i" },
         })
         .toArray();
-      res.send(result);
+
+      if (result) {
+        return res.send(result);
+      } else {
+        const result = await toyCollection.find().toArray();
+        return res.send(result);
+      }
+
+      // } else {
+      //   const result = await toyCollection.find().toArray();
+      //   return res.send(result);
+      // }
     });
 
+    //get all toys
     app.get("/allToys", async (req, res) => {
       const result = await toyCollection.find().limit(20).toArray();
       res.send(result);
@@ -48,15 +62,45 @@ async function run() {
       const result = await toyCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
+    //get by category name
+    app.get("/toys/:category", async (req, res) => {
+      const subCategory = req.params.category;
 
+      if (subCategory == "all") {
+        const result = await toyCollection.find().toArray();
+        return res.send(result);
+      } else {
+        const query = { category: subCategory };
+        const result = await toyCollection.find(query).limit(6).toArray();
+        return res.send(result);
+      }
+    });
+
+    //get my toy by ascending and decending
     app.get("/myToys", async (req, res) => {
-      const email = req.query.email;
+      // const email = req.query.email;
+      // console.log(typeof req.query.price);
+
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
+        if (req.query.price === "ascending") {
+          const result = await toyCollection
+            .find(query)
+            .sort({ price: 1 })
+            .toArray();
+          return res.send(result);
+        } else if (req.query.price === "descending") {
+          const result = await toyCollection
+            .find(query)
+            .sort({ price: -1 })
+            .toArray();
+          return res.send(result);
+        } else {
+          const result = await toyCollection.find(query).toArray();
+          return res.send(result);
+        }
       }
-      const result = await toyCollection.find(query).toArray();
-      res.send(result);
     });
 
     app.get("/toy/:id", async (req, res) => {
@@ -64,7 +108,7 @@ async function run() {
       const result = await toyCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
-
+    //update toy in id
     app.patch("/toy/:id", async (req, res) => {
       const id = req.params.id;
       const toys = req.body;
@@ -84,12 +128,13 @@ async function run() {
       res.send(result);
     });
 
+    //delete one toy
     app.delete("/toy/:id", async (req, res) => {
       const id = req.params.id;
       const result = await toyCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
     });
-
+    //inset the one toy
     app.post("/insert/toys", async (req, res) => {
       const toys = req.body;
       //console.log(toys);
