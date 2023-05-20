@@ -27,7 +27,7 @@ async function run() {
 
     const indexKey = { toyName: 1 };
     const indexOptions = { name: "toyName" };
-    const result = await toyCollection.createIndex(indexKey, indexOptions);
+    // const result = await toyCollection.createIndex(indexKey, indexOptions);
 
     ///search by toys name
     app.get("/getToys/:name", async (req, res) => {
